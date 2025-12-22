@@ -3,12 +3,12 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from core.agent_base import Agent
-from services.gemini_client import gemini_pro
+from services.gemini_client import gemini_flash
 
 class TutorAgent(Agent):
     def __init__(self):
         super().__init__("TutorAgent")
-        self.model = gemini_pro()
+        self.model = gemini_flash()
 
     async def run(self, input_data, tutor_state):
         """

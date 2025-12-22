@@ -13,5 +13,6 @@ if not api_key:
 
 genai.configure(api_key=api_key)
 
-def gemini_pro():
+
+def gemini_flash():
     return genai.GenerativeModel("gemini-2.5-flash")
