@@ -1,19 +1,40 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import About from './pages/About';
+import Chat from './pages/Chat';
+import Games from './pages/Games';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'light' || saved === 'dark') return saved;
+    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)')?.matches;
+    return prefersDark ? 'dark' : 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
 
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
         return <Home />;
+      case 'games':
+        return <Games />;
       case 'about':
         return <About />;
+      case 'chat':
+        return <Chat />;
       default:
         return <Home />;
     }
@@ -21,11 +42,16 @@ function App() {
 
   return (
     <div className="app">
-      <Navbar currentPage={currentPage} onNavigate={setCurrentPage} />
+      <Navbar
+        currentPage={currentPage}
+        onNavigate={setCurrentPage}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
       
       <main className="main-content">
         {renderPage()}
-        <Footer />
+        {currentPage !== 'chat' && <Footer />}
       </main>
     </div>
   );

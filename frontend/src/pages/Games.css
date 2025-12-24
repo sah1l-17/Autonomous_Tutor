@@ -1,4 +1,5 @@
-.about {
+/* Page */
+.games {
   background: var(--bg);
 }
 
@@ -8,10 +9,12 @@
   padding: 0 24px;
 }
 
+/* Shared (kept consistent with Home/About) */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 10px;
   border-radius: 999px;
   padding: 12px 18px;
   font-weight: 700;
@@ -30,16 +33,6 @@
   background: var(--accent-strong);
 }
 
-.btn-secondary {
-  background: transparent;
-  color: var(--text);
-  border-color: color-mix(in srgb, var(--text) 12%, transparent);
-}
-
-.btn-secondary:hover {
-  background: color-mix(in srgb, var(--text) 4%, transparent);
-}
-
 .section {
   padding: 72px 0;
 }
@@ -48,12 +41,6 @@
   background: var(--bg-muted);
   border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
   border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-}
-
-.section-head {
-  text-align: center;
-  max-width: 820px;
-  margin: 0 auto 34px;
 }
 
 .eyebrow {
@@ -66,7 +53,7 @@
 
 .section-title {
   margin: 12px 0 10px;
-  font-size: 36px;
+  font-size: 34px;
   letter-spacing: -0.02em;
   color: var(--text);
 }
@@ -74,109 +61,102 @@
 .section-subtitle {
   color: var(--text-muted);
   line-height: 1.7;
+  max-width: 70ch;
 }
 
-.about-hero {
+/* Hero */
+.games-hero {
   padding: 64px 0 36px;
   background: radial-gradient(1100px 500px at 50% 15%, rgba(37, 99, 235, 0.12), transparent 60%),
     linear-gradient(180deg, var(--bg-muted), var(--bg));
   border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
 }
 
-.about-title {
+.games-title {
   margin: 12px 0 10px;
   font-size: 44px;
   letter-spacing: -0.03em;
   color: var(--text);
 }
 
-.about-subtitle {
+.games-subtitle {
   color: var(--text-muted);
   line-height: 1.7;
-  max-width: 68ch;
+  max-width: 72ch;
 }
 
-.about-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 20px;
-  flex-wrap: wrap;
-}
-
-.grid {
+/* Game rows */
+.game-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: center;
 }
 
-.card {
-  border-radius: 18px;
-  background: var(--surface);
-  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
-  padding: 18px 18px;
+.game-grid.reverse .game-copy {
+  order: 2;
 }
 
-.card-title {
-  margin: 0;
-  font-size: 16px;
-  color: var(--text);
+.game-grid.reverse .game-media {
+  order: 1;
 }
 
-.card-desc {
-  margin: 8px 0 0;
+.game-bullets {
+  margin: 18px 0 0;
+  padding-left: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.game-bullets li {
+  position: relative;
+  padding-left: 28px;
   color: var(--text-muted);
   line-height: 1.65;
-  font-size: 14px;
 }
 
-.steps {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+.game-bullets li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 14px;
+  height: 14px;
+  border-radius: 6px;
+  background: rgba(37, 99, 235, 0.18);
+  border: 1px solid rgba(37, 99, 235, 0.25);
 }
 
-.step {
-  border-radius: 18px;
-  background: var(--surface);
+.game-actions {
+  margin-top: 20px;
+}
+
+.game-card {
+  border-radius: 22px;
+  overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
-  padding: 16px 16px;
-  display: flex;
-  gap: 14px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.10);
 }
 
-.step-num {
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  font-size: 12px;
-  color: var(--accent-strong);
-  background: rgba(37, 99, 235, 0.10);
-  border: 1px solid rgba(37, 99, 235, 0.18);
-  flex-shrink: 0;
-}
-
-.step-title {
-  font-weight: 800;
-  color: var(--text);
-}
-
-.step-desc {
-  margin-top: 4px;
-  color: var(--text-muted);
-  font-size: 14px;
-  line-height: 1.6;
+.game-image {
+  display: block;
+  width: 100%;
+  height: 360px;
+  object-fit: cover;
 }
 
 @media (max-width: 960px) {
-  .grid {
+  .game-grid {
     grid-template-columns: 1fr;
   }
 
-  .steps {
-    grid-template-columns: 1fr;
+  .game-grid.reverse .game-copy,
+  .game-grid.reverse .game-media {
+    order: unset;
+  }
+
+  .game-image {
+    height: 320px;
   }
 }

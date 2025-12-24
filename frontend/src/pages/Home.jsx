@@ -1,10 +1,7 @@
 import { motion } from 'framer-motion';
-import { useState } from 'react';
 import './Home.css';
 
 function Home() {
-  const [openFaq, setOpenFaq] = useState(null);
-
   const features = [
     {
       title: 'Multimodal ingestion',
@@ -185,37 +182,21 @@ function Home() {
             <p className="section-subtitle">Everything you need to know before you start.</p>
           </div>
 
-          <div className="faq-grid">
-            {faqs.map((faq, index) => (
-              <button
-                key={faq.question}
-                className={`faq ${openFaq === index ? 'open' : ''}`}
-                type="button"
-                onClick={() => setOpenFaq(openFaq === index ? null : index)}
-              >
-                <div className="faq-q">
-                  {faq.question}
-                  <span className="faq-icon" aria-hidden="true">{openFaq === index ? '−' : '+'}</span>
+          <div className="quick-cards" aria-label="Quick answers">
+            {faqs.map((faq) => (
+              <div key={faq.question} className="flip-card" tabIndex={0}>
+                <div className="flip-card-inner">
+                  <div className="flip-card-front">
+                    <p className="flip-title">{faq.question}</p>
+                    <p className="flip-hint">Hover or focus to flip</p>
+                  </div>
+                  <div className="flip-card-back">
+                    <p className="flip-title">Answer</p>
+                    <p className="flip-text">{faq.answer}</p>
+                  </div>
                 </div>
-                <div className="faq-a" aria-hidden={openFaq !== index}>
-                  {faq.answer}
-                </div>
-              </button>
+              </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="cta">
-        <div className="container cta-inner">
-          <div>
-            <div className="eyebrow">Get started</div>
-            <h2 className="cta-title">Start learning in minutes</h2>
-            <p className="cta-subtitle">Bring your content, ask questions, and practice until it sticks.</p>
-          </div>
-          <div className="cta-actions">
-            <button className="btn btn-primary" type="button">Get Started</button>
-            <a className="btn btn-secondary" href="#features">View features</a>
           </div>
         </div>
       </section>
