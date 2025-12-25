@@ -328,9 +328,9 @@ async def generate_game(request: GameRequest):
     Generate practice game - creates active recall exercises.
     
     Game types:
-    - swipe_sort: Binary classification (8-12 cards)
+    - swipe_sort: Binary classification (6-8 cards)
     - impostor: Find the subtle outlier (4 options)
-    - match_pairs: Relational associations (5-8 pairs)
+    - match_pairs: Relational associations (3-5 pairs)
     
     Note: Concept must be understood first (via tutor interaction)
     """

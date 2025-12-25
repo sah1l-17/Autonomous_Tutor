@@ -60,7 +60,10 @@ function Games({ onNavigate }) {
                     <button 
                       className="btn btn-primary" 
                       type="button"
-                      onClick={() => game.id === 'imposter' && onNavigate('impostor-game')}
+                      onClick={() => {
+                        if (game.id === 'imposter') onNavigate('impostor-game');
+                        if (game.id === 'pair') onNavigate('match-pairs-game');
+                      }}
                     >
                       Play
                     </button>

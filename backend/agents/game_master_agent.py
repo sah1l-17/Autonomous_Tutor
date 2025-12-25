@@ -52,9 +52,9 @@ class GameMasterAgent(Agent):
     SUPPORTED_GAME_TYPES = ["swipe_sort", "impostor", "match_pairs"]
     
     # Game sizing parameters (cognitive load balanced)
-    SWIPE_SORT_CARD_RANGE = (8, 12)      # Enough items to test patterns
+    SWIPE_SORT_CARD_RANGE = (6, 8)      # Enough items to test patterns
     IMPOSTOR_OPTIONS_COUNT = 4           # 3 genuine + 1 impostor
-    MATCH_PAIRS_RANGE = (5, 8)           # Vocabulary/relationship depth
+    MATCH_PAIRS_RANGE = (3, 5)           # Vocabulary/relationship depth
     
     # Quality thresholds
     MIN_BOUNDARY_ITEMS_RATIO = 0.35      # At least 35% should be edge cases

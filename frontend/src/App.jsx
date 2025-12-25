@@ -7,13 +7,14 @@ import About from './pages/About';
 import Chat from './pages/Chat';
 import Games from './pages/Games';
 import ImpostorGame from './pages/ImpostorGame';
+import MatchPairsGame from './pages/MatchPairsGame';
 
 const CURRENT_PAGE_STORAGE_KEY = 'autonomousTutorCurrentPage';
 
 function App() {
   const [currentPage, setCurrentPage] = useState(() => {
     const saved = localStorage.getItem(CURRENT_PAGE_STORAGE_KEY);
-    const allowed = new Set(['home', 'chat', 'games', 'impostor-game', 'about']);
+    const allowed = new Set(['home', 'chat', 'games', 'impostor-game', 'match-pairs-game', 'about']);
     return allowed.has(saved) ? saved : 'home';
   });
   const [theme, setTheme] = useState(() => {
@@ -44,6 +45,8 @@ function App() {
         return <Games onNavigate={setCurrentPage} />;
       case 'impostor-game':
         return <ImpostorGame />;
+      case 'match-pairs-game':
+        return <MatchPairsGame />;
       case 'about':
         return <About />;
       case 'chat':
@@ -64,7 +67,7 @@ function App() {
       
       <main className="main-content">
         {renderPage()}
-        {currentPage !== 'chat' && currentPage !== 'impostor-game' && <Footer />}
+        {currentPage !== 'chat' && currentPage !== 'impostor-game' && currentPage !== 'match-pairs-game' && <Footer />}
       </main>
     </div>
   );
