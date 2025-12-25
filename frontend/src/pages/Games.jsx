@@ -8,7 +8,7 @@ function Games() {
       title: 'Swipe-Sort',
       description:
         'Stop relying on slow, rote memorization and start building true muscle memory. Swipe-Sort turns your study material into a rapid-fire decision game where you swipe left or right to categorize facts, formulas, and concepts instantly. It’s the fastest, most addictive way to test your reflexes and ensure you know your material inside out.',
-      imageSrc: '/games/swipe-sort.png',
+      imageSrc: './public/swipe-sort.png',
       imageAlt: 'Swipe-Sort game preview',
     },
     {
@@ -17,7 +17,7 @@ function Games() {
       title: 'The Imposter',
       description:
         "True mastery isn't just about knowing the right answer—it's about spotting the wrong one. In this game, our AI generates a group of related concepts hiding a single, clever \"imposter\" that doesn't belong. You’ll need to use deep critical thinking to catch the subtle traps and analyze the nuances that separate similar ideas.",
-      imageSrc: '/games/imposter.png',
+      imageSrc: './public/imposter.png',
       imageAlt: 'Imposter game preview',
     },
     {
@@ -26,7 +26,7 @@ function Games() {
       title: 'Pair Match',
       description:
         'Knowledge is all about making connections. Pair Match challenges you to link terms to definitions, causes to effects, or problems to solutions in a grid of hidden cards. It’s a reimagined classic that moves beyond simple recall to test how well you understand the underlying relationships between the complex topics you are learning.',
-      imageSrc: '/games/pair.png',
+      imageSrc: './public/pair.png',
       imageAlt: 'Pair game preview',
     },
   ];

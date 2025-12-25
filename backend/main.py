@@ -27,12 +27,17 @@ from typing import Optional, Dict, Any, List
 import uuid
 from datetime import datetime
 
+from dotenv import load_dotenv
+
 from agents.orchestrator_agent import OrchestratorAgent
 from agents.ingestion_agent import IngestionAgent
 from agents.tutor_agent import TutorAgent
 from agents.game_master_agent import GameMasterAgent
 from core.session_state import SessionState
 from services.file_loader import load_pdf_bytes, load_image_bytes, load_text_input
+from services.session_store import build_session_store_from_env, SessionStore
+
+load_dotenv()
 
 # ============================================================================
 # APPLICATION SETUP
@@ -64,17 +69,31 @@ app.add_middleware(
 # SESSION MANAGEMENT
 # ============================================================================
 
-# In-memory session store (replace with Redis/DB in production)
-sessions: Dict[str, SessionState] = {}
+session_store: SessionStore = build_session_store_from_env()
 
-def get_or_create_session(session_id: Optional[str] = None) -> tuple[str, SessionState]:
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    close = getattr(session_store, "close", None)
+    if callable(close):
+        await close()
+
+
+async def get_or_create_session(session_id: Optional[str] = None) -> tuple[str, SessionState]:
     """Get existing session or create new one."""
-    if session_id and session_id in sessions:
-        return session_id, sessions[session_id]
-    
-    new_session_id = str(uuid.uuid4())
-    sessions[new_session_id] = SessionState()
-    return new_session_id, sessions[new_session_id]
+    if session_id:
+        existing = await session_store.get(session_id)
+        if existing is not None:
+            return session_id, existing
+
+    return await session_store.create()
+
+
+async def get_session_or_404(session_id: str) -> SessionState:
+    session = await session_store.get(session_id)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return session
 
 # ============================================================================
 # REQUEST/RESPONSE MODELS
@@ -140,7 +159,7 @@ async def health_check():
     """Detailed health check."""
     return {
         "status": "healthy",
-        "active_sessions": len(sessions),
+        "active_sessions": await session_store.count(),
         "timestamp": datetime.utcnow().isoformat()
     }
 
@@ -155,7 +174,7 @@ async def chat(request: ChatRequest):
     - type="practice" -> Game Master Agent
     """
     try:
-        session_id, session = get_or_create_session(request.session_id)
+        session_id, session = await get_or_create_session(request.session_id)
         
         # Prepare input data for orchestrator
         input_data = {
@@ -173,6 +192,9 @@ async def chat(request: ChatRequest):
         
         # Process through orchestrator
         result = await orchestrator.handle(input_data, session)
+
+        # Persist updated session
+        await session_store.save(session_id, session)
         
         return ChatResponse(
             session_id=session_id,
@@ -196,7 +218,7 @@ async def ingest_content(request: IngestRequest):
     - clean_markdown: Structured document
     """
     try:
-        session_id, session = get_or_create_session(request.session_id)
+        session_id, session = await get_or_create_session(request.session_id)
         
         input_data = {
             "type": request.type,
@@ -211,6 +233,8 @@ async def ingest_content(request: IngestRequest):
         
         if result.get("core_concepts") and len(result["core_concepts"]) > 0:
             session.current_concept = result["core_concepts"][0]
+
+        await session_store.save(session_id, session)
         
         return ChatResponse(
             session_id=session_id,
@@ -238,10 +262,7 @@ async def ask_tutor(request: TutorRequest):
     Note: Content must be ingested first via /api/ingest or /api/chat
     """
     try:
-        if request.session_id not in sessions:
-            raise HTTPException(status_code=404, detail="Session not found")
-        
-        session = sessions[request.session_id]
+        session = await get_session_or_404(request.session_id)
         
         if not session.ingested_content:
             raise HTTPException(
@@ -270,6 +291,8 @@ async def ask_tutor(request: TutorRequest):
         session.last_explanation_style = tutor_state["last_explanation_style"]
         session.concept_understood = result.get("understood", False)
         session.last_agent = "tutor"
+
+        await session_store.save(request.session_id, session)
         
         return ChatResponse(
             session_id=request.session_id,
@@ -295,10 +318,7 @@ async def generate_game(request: GameRequest):
     Note: Concept must be understood first (via tutor interaction)
     """
     try:
-        if request.session_id not in sessions:
-            raise HTTPException(status_code=404, detail="Session not found")
-        
-        session = sessions[request.session_id]
+        session = await get_session_or_404(request.session_id)
         
         if not session.concept_understood:
             raise HTTPException(
@@ -326,6 +346,8 @@ async def generate_game(request: GameRequest):
         
         result = await game_master_agent.run(game_input)
         session.last_agent = "game_master"
+
+        await session_store.save(request.session_id, session)
         
         return ChatResponse(
             session_id=request.session_id,
@@ -341,10 +363,7 @@ async def generate_game(request: GameRequest):
 @app.get("/api/session/{session_id}")
 async def get_session(session_id: str):
     """Get current session state."""
-    if session_id not in sessions:
-        raise HTTPException(status_code=404, detail="Session not found")
-    
-    session = sessions[session_id]
+    session = await get_session_or_404(session_id)
     
     return {
         "session_id": session_id,
@@ -361,16 +380,15 @@ async def get_session(session_id: str):
 @app.delete("/api/session/{session_id}")
 async def clear_session(session_id: str):
     """Clear/delete a session."""
-    if session_id in sessions:
-        del sessions[session_id]
+    deleted = await session_store.delete(session_id)
+    if deleted:
         return {"message": "Session cleared successfully"}
-    
     raise HTTPException(status_code=404, detail="Session not found")
 
 @app.post("/api/session/new")
 async def create_session():
     """Create a new session explicitly."""
-    session_id, _ = get_or_create_session()
+    session_id, _ = await get_or_create_session()
     return {
         "session_id": session_id,
         "message": "New session created"
@@ -418,7 +436,7 @@ async def upload_file(
             )
         
         # Process through ingestion
-        session_id, session = get_or_create_session(session_id)
+        session_id, session = await get_or_create_session(session_id)
         
         result = await ingestion_agent.run(input_data)
         
@@ -428,6 +446,8 @@ async def upload_file(
         
         if result.get("core_concepts") and len(result["core_concepts"]) > 0:
             session.current_concept = result["core_concepts"][0]
+
+        await session_store.save(session_id, session)
         
         return {
             "session_id": session_id,

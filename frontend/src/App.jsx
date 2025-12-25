@@ -7,8 +7,14 @@ import About from './pages/About';
 import Chat from './pages/Chat';
 import Games from './pages/Games';
 
+const CURRENT_PAGE_STORAGE_KEY = 'autonomousTutorCurrentPage';
+
 function App() {
-  const [currentPage, setCurrentPage] = useState('home');
+  const [currentPage, setCurrentPage] = useState(() => {
+    const saved = localStorage.getItem(CURRENT_PAGE_STORAGE_KEY);
+    const allowed = new Set(['home', 'chat', 'games', 'about']);
+    return allowed.has(saved) ? saved : 'home';
+  });
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('theme');
     if (saved === 'light' || saved === 'dark') return saved;
@@ -20,6 +26,10 @@ function App() {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem(CURRENT_PAGE_STORAGE_KEY, currentPage);
+  }, [currentPage]);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));

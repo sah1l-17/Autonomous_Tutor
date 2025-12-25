@@ -73,13 +73,38 @@ class OrchestratorAgent:
                 concepts = session.ingested_content.get("core_concepts", [])
                 concept = concepts[0] if concepts else "general knowledge"
 
-            game_input = {
-                "concept": concept,
-                "nuances": input_data.get("nuances", []),
-                "game_type": input_data["game_type"]
-            }
-
-            result = await self.game_master_agent.run(game_input)
+            game_type = input_data["game_type"]
+            
+            # Initialize tracking for this concept and game type if needed
+            if concept not in session.generated_games:
+                session.generated_games[concept] = {}
+                session.game_index[concept] = {}
+            
+            if game_type not in session.generated_games[concept]:
+                session.generated_games[concept][game_type] = []
+                session.game_index[concept][game_type] = 0
+            
+            # Check if we need to generate new games
+            current_index = session.game_index[concept][game_type]
+            existing_games = session.generated_games[concept][game_type]
+            
+            # If we've exhausted current batch, generate 5 more
+            if current_index >= len(existing_games):
+                game_input = {
+                    "concept": concept,
+                    "nuances": input_data.get("nuances", []),
+                    "game_type": game_type
+                }
+                
+                batch_result = await self.game_master_agent.run(game_input)
+                
+                # Store the new batch
+                session.generated_games[concept][game_type].extend(batch_result["games"])
+            
+            # Return the next game from the batch
+            next_game = session.generated_games[concept][game_type][current_index]
+            session.game_index[concept][game_type] += 1
+            
             session.last_agent = "game_master"
 
-            return result
+            return next_game

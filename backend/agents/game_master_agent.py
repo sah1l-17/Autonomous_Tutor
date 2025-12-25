@@ -59,6 +59,9 @@ class GameMasterAgent(Agent):
     # Quality thresholds
     MIN_BOUNDARY_ITEMS_RATIO = 0.35      # At least 35% should be edge cases
     
+    # Batch generation
+    GAMES_PER_BATCH = 5                  # Generate 5 games at a time
+    
     def __init__(self):
         super().__init__("GameMasterAgent")
         self.model = gemini_flash()
@@ -69,7 +72,7 @@ class GameMasterAgent(Agent):
     
     async def run(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Generate cognitively rigorous active-recall game.
+        Generate 5 cognitively rigorous active-recall games in a batch.
         
         INPUT CONTRACT:
         {
@@ -79,16 +82,18 @@ class GameMasterAgent(Agent):
         }
         
         OUTPUT CONTRACT:
-        Frontend-ready JSON matching game schema. No explanations, hints, or prose.
+        Frontend-ready JSON batch containing 5 games. No explanations, hints, or prose.
         
         ARCHITECTURAL GUARANTEES:
         - No teaching or explanations (that's Tutor Agent's job)
         - No answer evaluation (that's Evaluator Agent's job)
         - No conversational text (pure structured data)
         - Stateless operation (no learner modeling)
+        - Always generates 5 unique games per request
         
         QUALITY GUARANTEE:
         Games test boundaries, use subtle distractors, and require active thinking.
+        Each game in the batch is unique and tests different aspects.
         """
         game_type = input_data.get("game_type")
         concept = input_data.get("concept", "")
@@ -104,13 +109,13 @@ class GameMasterAgent(Agent):
         if not concept or concept.strip() == "":
             raise ValueError("Concept cannot be empty")
         
-        # Route to specialized generator
+        # Route to specialized batch generator
         if game_type == "swipe_sort":
-            return await self._generate_swipe_sort(concept, nuances)
+            return await self._generate_swipe_sort_batch(concept, nuances)
         elif game_type == "impostor":
-            return await self._generate_impostor(concept, nuances)
+            return await self._generate_impostor_batch(concept, nuances)
         elif game_type == "match_pairs":
-            return await self._generate_match_pairs(concept, nuances)
+            return await self._generate_match_pairs_batch(concept, nuances)
     
     
     # ============================================================================
@@ -188,7 +193,23 @@ class GameMasterAgent(Agent):
     # SWIPE-SORT GAME GENERATOR (Binary Classification with Boundary Focus)
     # ============================================================================
     
-    async def _generate_swipe_sort(self, concept: str, nuances: List[str]) -> Dict[str, Any]:
+    async def _generate_swipe_sort_batch(self, concept: str, nuances: List[str]) -> Dict[str, Any]:
+        """
+        Generate a batch of 5 swipe-sort games.
+        """
+        games = []
+        for i in range(self.GAMES_PER_BATCH):
+            game = await self._generate_swipe_sort(concept, nuances, i + 1)
+            games.append(game)
+        
+        return {
+            "game_type": "swipe_sort",
+            "concept": concept,
+            "games": games,
+            "total_games": self.GAMES_PER_BATCH
+        }
+    
+    async def _generate_swipe_sort(self, concept: str, nuances: List[str], variation: int = 1) -> Dict[str, Any]:
         """
         Generate boundary-focused binary classification game.
         
@@ -290,7 +311,8 @@ GENERATION INSTRUCTIONS
 3. Ensure 35%+ are boundary/edge cases
 4. Vary surface form and phrasing
 5. Make learner apply concept's core principle to classify
-6. Output ONLY the JSON structure below (no prose, no markdown)
+6. Create UNIQUE items (variation #{variation} of this game type)
+7. Output ONLY the JSON structure below (no prose, no markdown)
 
 OUTPUT FORMAT (STRICT):
 {{
@@ -310,7 +332,23 @@ CRITICAL: Return ONLY valid JSON. No explanations. No code blocks. No prose."""
     # IMPOSTOR GAME GENERATOR (Subtle Boundary Discrimination)
     # ============================================================================
     
-    async def _generate_impostor(self, concept: str, nuances: List[str]) -> Dict[str, Any]:
+    async def _generate_impostor_batch(self, concept: str, nuances: List[str]) -> Dict[str, Any]:
+        """
+        Generate a batch of 5 impostor games.
+        """
+        games = []
+        for i in range(self.GAMES_PER_BATCH):
+            game = await self._generate_impostor(concept, nuances, i + 1)
+            games.append(game)
+        
+        return {
+            "game_type": "impostor",
+            "concept": concept,
+            "games": games,
+            "total_games": self.GAMES_PER_BATCH
+        }
+    
+    async def _generate_impostor(self, concept: str, nuances: List[str], variation: int = 1) -> Dict[str, Any]:
         """
         Generate "find the impostor" game with subtle outlier detection.
         
@@ -409,7 +447,8 @@ GENERATION INSTRUCTIONS
 2. Create 3 genuine examples that clearly fit
 3. Create 1 impostor that SUBTLY violates the principle
 4. Ensure impostor shares surface similarities with genuine options
-5. Output ONLY the JSON structure below (no prose, no markdown)
+5. Create UNIQUE options (variation #{variation} of this game type)
+6. Output ONLY the JSON structure below (no prose, no markdown)
 
 OUTPUT FORMAT (STRICT):
 {{
@@ -428,7 +467,23 @@ CRITICAL: Return ONLY valid JSON. No explanations. No code blocks. No prose."""
     # MATCH-PAIRS GAME GENERATOR (Relational Understanding)
     # ============================================================================
     
-    async def _generate_match_pairs(self, concept: str, nuances: List[str]) -> Dict[str, Any]:
+    async def _generate_match_pairs_batch(self, concept: str, nuances: List[str]) -> Dict[str, Any]:
+        """
+        Generate a batch of 5 match-pairs games.
+        """
+        games = []
+        for i in range(self.GAMES_PER_BATCH):
+            game = await self._generate_match_pairs(concept, nuances, i + 1)
+            games.append(game)
+        
+        return {
+            "game_type": "match_pairs",
+            "concept": concept,
+            "games": games,
+            "total_games": self.GAMES_PER_BATCH
+        }
+    
+    async def _generate_match_pairs(self, concept: str, nuances: List[str], variation: int = 1) -> Dict[str, Any]:
         """
         Generate term-association matching game testing relational understanding.
         
@@ -533,7 +588,8 @@ GENERATION INSTRUCTIONS
 2. Create functional/relational associations (not just definitions)
 3. Ensure associations test understanding, not memorization
 4. Use precise, specific language
-5. Output ONLY the JSON structure below (no prose, no markdown)
+5. Create UNIQUE pairs (variation #{variation} of this game type)
+6. Output ONLY the JSON structure below (no prose, no markdown)
 
 OUTPUT FORMAT (STRICT):
 {{
