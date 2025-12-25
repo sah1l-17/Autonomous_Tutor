@@ -39,6 +39,8 @@ class SessionState:
             "last_explanation_style": safe(self.last_explanation_style),
             "clarification_requests": int(self.clarification_requests or 0),
             "understood": bool(self.understood),
+            "generated_games": safe(getattr(self, "generated_games", {})),
+            "game_index": safe(getattr(self, "game_index", {})),
         }
 
     @classmethod
@@ -57,4 +59,8 @@ class SessionState:
         s.last_explanation_style = data.get("last_explanation_style")
         s.clarification_requests = int(data.get("clarification_requests", 0) or 0)
         s.understood = bool(data.get("understood", False))
+
+        # Game tracking state (persist across reloads)
+        s.generated_games = data.get("generated_games") or {}
+        s.game_index = data.get("game_index") or {}
         return s

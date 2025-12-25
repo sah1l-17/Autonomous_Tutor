@@ -1,6 +1,6 @@
 import './Games.css';
 
-function Games() {
+function Games({ onNavigate }) {
   const games = [
     {
       id: 'swipe-sort',
@@ -57,7 +57,11 @@ function Games() {
                   <p className="section-subtitle">{game.description}</p>
 
                   <div className="game-actions">
-                    <button className="btn btn-primary" type="button">
+                    <button 
+                      className="btn btn-primary" 
+                      type="button"
+                      onClick={() => game.id === 'imposter' && onNavigate('impostor-game')}
+                    >
                       Play
                     </button>
                   </div>

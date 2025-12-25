@@ -4,6 +4,7 @@ import os
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import logging
 from typing import Optional, Protocol, Tuple
 
 try:
@@ -12,6 +13,9 @@ except Exception:  # pragma: no cover
     AsyncIOMotorClient = None  # type: ignore
 
 from core.session_state import SessionState
+
+
+logger = logging.getLogger(__name__)
 
 
 def _utc_now_iso() -> str:
@@ -71,7 +75,12 @@ class MongoSessionStore:
         if AsyncIOMotorClient is None:
             raise RuntimeError("motor is not installed; add 'motor' to requirements.txt")
 
-        self._client = AsyncIOMotorClient(mongo_uri)
+        # Fail fast on misconfigured/blocked Mongo in dev environments.
+        self._client = AsyncIOMotorClient(
+            mongo_uri,
+            serverSelectionTimeoutMS=int(os.getenv("MONGODB_SERVER_SELECTION_TIMEOUT_MS", "3000")),
+            connectTimeoutMS=int(os.getenv("MONGODB_CONNECT_TIMEOUT_MS", "3000")),
+        )
         self._collection = self._client[db_name][collection_name]
 
     async def get(self, session_id: str) -> Optional[SessionState]:
@@ -119,7 +128,19 @@ class MongoSessionStore:
 
 
 def build_session_store_from_env() -> SessionStore:
-    mongo_uri = os.getenv("MONGODB_URI")
+    mongo_uri = (
+        os.getenv("MONGODB_URI")
+        or os.getenv("MONGO_URI")
+        or os.getenv("MONGO_URL")
+    )
+
+    # Allow targeting a specific DB/collection without changing code.
+    db_name = os.getenv("MONGODB_DB") or os.getenv("MONGO_DB") or "autonomous_tutor"
+    collection_name = os.getenv("MONGODB_COLLECTION") or os.getenv("MONGO_COLLECTION") or "sessions"
+
     if mongo_uri:
-        return MongoSessionStore(mongo_uri=mongo_uri)
+        logger.info("Using MongoSessionStore db=%s collection=%s", db_name, collection_name)
+        return MongoSessionStore(mongo_uri=mongo_uri, db_name=db_name, collection_name=collection_name)
+
+    logger.warning("MONGODB_URI not set; falling back to InMemorySessionStore")
     return InMemorySessionStore()

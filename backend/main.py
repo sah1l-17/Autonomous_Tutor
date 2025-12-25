@@ -37,7 +37,16 @@ from core.session_state import SessionState
 from services.file_loader import load_pdf_bytes, load_image_bytes, load_text_input
 from services.session_store import build_session_store_from_env, SessionStore
 
-load_dotenv()
+# Load environment variables from the repo root `.env` explicitly.
+# This avoids relying on python-dotenv's auto-discovery (find_dotenv), which can
+# fail in some execution contexts.
+try:
+    repo_root = Path(__file__).resolve().parents[1]
+    load_dotenv(dotenv_path=repo_root / ".env")
+except Exception:
+    # If env loading fails, the app can still run (it may fall back to in-memory
+    # session storage), but configuration via the shell environment will still work.
+    pass
 
 # ============================================================================
 # APPLICATION SETUP

@@ -1,0 +1,521 @@
+/* Impostor Game Page Styles */
+
+.impostor-game {
+  min-height: 100vh;
+  padding: 2rem 0 4rem;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.impostor-game .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ============================================================================
+   Header Section
+   ============================================================================ */
+
+.game-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.game-title-section {
+  margin-bottom: 2rem;
+}
+
+.game-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  line-height: 1.1;
+}
+
+.game-title .accent {
+  color: var(--accent);
+}
+
+.game-subtitle {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* ============================================================================
+   Stats Bar
+   ============================================================================ */
+
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  background: color-mix(in srgb, var(--surface) 95%, var(--accent) 5%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.streak-value {
+  color: var(--accent);
+}
+
+/* ============================================================================
+   Message Area
+   ============================================================================ */
+
+.message {
+  padding: 1.25rem 2rem;
+  border-radius: 12px;
+  margin: 2rem auto;
+  max-width: 600px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.125rem;
+  border: 2px solid transparent;
+}
+
+.message.success {
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--text);
+}
+
+.message.error {
+  background: color-mix(in srgb, #ef4444 10%, var(--surface));
+  border-color: color-mix(in srgb, #ef4444 40%, transparent);
+  color: var(--text);
+}
+
+.message.info {
+  background: var(--surface);
+  border-color: color-mix(in srgb, var(--border) 90%, transparent);
+  color: var(--text);
+}
+
+/* ============================================================================
+   Game Area
+   ============================================================================ */
+
+.game-area {
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+}
+
+.loader {
+  width: 50px;
+  height: 50px;
+  border: 4px solid color-mix(in srgb, var(--border) 90%, transparent);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-state p {
+  font-size: 1.125rem;
+  color: var(--text-muted);
+}
+
+/* Ready State */
+.ready-state {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.btn-large {
+  font-size: 1.5rem;
+  padding: 1.25rem 3rem;
+}
+
+/* Error State */
+.error-state {
+  text-align: center;
+}
+
+.error-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.error-state p {
+  font-size: 1.125rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ============================================================================
+   Game Board
+   ============================================================================ */
+
+.game-board {
+  width: 100%;
+  max-width: 900px;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* ============================================================================
+   Flip Cards (Click-based)
+   ============================================================================ */
+
+.card-wrapper {
+  perspective: 1000px;
+}
+
+.flip-card-game {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.flip-card-game:hover {
+  transform: scale(1.02);
+}
+
+.flip-card-game:active {
+  transform: scale(0.98);
+}
+
+.flip-card-game-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.flip-card-game.flipped .flip-card-game-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-game-front,
+.flip-card-game-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.flip-card-game-front {
+  background: var(--surface);
+  color: var(--text);
+  border: 2px solid color-mix(in srgb, var(--border) 90%, transparent);
+}
+
+.flip-card-game-back {
+  background: linear-gradient(135deg, 
+    color-mix(in srgb, var(--accent) 30%, var(--bg) 70%) 0%, 
+    color-mix(in srgb, var(--accent) 18%, var(--surface) 82%) 60%, 
+    color-mix(in srgb, var(--accent) 26%, var(--bg-muted) 74%) 100%
+  );
+  color: var(--text);
+  transform: rotateY(180deg);
+  border: 2px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+}
+
+/* Front Card Content */
+.card-number {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.card-text {
+  font-size: 1.125rem;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.5;
+  margin: 0;
+  color: var(--text);
+}
+
+.card-hint {
+  position: absolute;
+  bottom: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Back Card Content */
+.reveal-content {
+  text-align: center;
+}
+
+.reveal-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.impostor-icon {
+  animation: pulse 0.5s ease-in-out;
+}
+
+.genuine-icon {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.reveal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.reveal-text {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Card State Styling */
+.flip-card-game.impostor .flip-card-game-back {
+  background: linear-gradient(135deg, 
+    color-mix(in srgb, #f5576c 30%, var(--bg) 70%) 0%, 
+    color-mix(in srgb, #f5576c 18%, var(--surface) 82%) 60%, 
+    color-mix(in srgb, #f5576c 26%, var(--bg-muted) 74%) 100%
+  );
+}
+
+.flip-card-game.not-impostor .flip-card-game-back {
+  background: linear-gradient(135deg, 
+    color-mix(in srgb, var(--accent) 30%, var(--bg) 70%) 0%, 
+    color-mix(in srgb, var(--accent) 18%, var(--surface) 82%) 60%, 
+    color-mix(in srgb, var(--accent) 26%, var(--bg-muted) 74%) 100%
+  );
+}
+
+/* ============================================================================
+   Game Actions
+   ============================================================================ */
+
+.game-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* ============================================================================
+   Buttons
+   ============================================================================ */
+
+.btn {
+  padding: 0.875rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 15px var(--ring);
+}
+
+.btn-primary:hover {
+  background: var(--accent-strong);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--ring);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+}
+
+.btn-secondary:hover {
+  background: color-mix(in srgb, var(--surface) 95%, var(--accent) 5%);
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+/* ============================================================================
+   How to Play Section
+   ============================================================================ */
+
+.how-to-play {
+  max-width: 700px;
+  margin: 4rem auto 0;
+  padding: 2rem;
+  background: var(--surface);
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+}
+
+.how-to-play h3 {
+  font-size: 1.5rem;
+  margin: 0 0 1.5rem;
+  text-align: center;
+}
+
+.how-to-play ol {
+  margin: 0;
+  padding-left: 1.5rem;
+  line-height: 1.8;
+}
+
+.how-to-play li {
+  font-size: 1.0625rem;
+  margin-bottom: 0.75rem;
+}
+
+.how-to-play li:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================================================
+   Responsive Design
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .game-title {
+    font-size: 2rem;
+  }
+
+  .game-subtitle {
+    font-size: 1rem;
+  }
+
+  .stats-bar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .message {
+    font-size: 1rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .flip-card-game {
+    height: 240px;
+  }
+
+  .card-text {
+    font-size: 1rem;
+  }
+
+  .game-actions {
+    flex-direction: column;
+  }
+
+  .how-to-play {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .impostor-game {
+    padding: 1rem 0 2rem;
+  }
+
+  .game-title {
+    font-size: 1.75rem;
+  }
+
+  .stats-bar {
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    padding: 1rem;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

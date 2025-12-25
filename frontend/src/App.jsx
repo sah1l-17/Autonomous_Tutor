@@ -6,13 +6,14 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Chat from './pages/Chat';
 import Games from './pages/Games';
+import ImpostorGame from './pages/ImpostorGame';
 
 const CURRENT_PAGE_STORAGE_KEY = 'autonomousTutorCurrentPage';
 
 function App() {
   const [currentPage, setCurrentPage] = useState(() => {
     const saved = localStorage.getItem(CURRENT_PAGE_STORAGE_KEY);
-    const allowed = new Set(['home', 'chat', 'games', 'about']);
+    const allowed = new Set(['home', 'chat', 'games', 'impostor-game', 'about']);
     return allowed.has(saved) ? saved : 'home';
   });
   const [theme, setTheme] = useState(() => {
@@ -40,7 +41,9 @@ function App() {
       case 'home':
         return <Home />;
       case 'games':
-        return <Games />;
+        return <Games onNavigate={setCurrentPage} />;
+      case 'impostor-game':
+        return <ImpostorGame />;
       case 'about':
         return <About />;
       case 'chat':
